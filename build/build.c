@@ -209,8 +209,10 @@ static rpmRC buildSpec(BTA_t buildArgs, rpmSpec spec, int what)
 	struct rpmtd_s td;
 	if (headerGet(h, RPMTAG_CHANGELOGTIME, &td, (HEADERGET_MINMEM|HEADERGET_RAW))) {
 	    char sdestr[22];
-	    snprintf(sdestr, sizeof(sdestr), "%lli",
-		     (long long) rpmtdGetNumber(&td));
+	    long long changelogepoch = rpmtdGetNumber(&td);
+	    if(changelogepoch%(24*60*60) == 12*60*60)
+		changelogepoch -= 12*60*60;
+	    snprintf(sdestr, sizeof(sdestr), "%lli", changelogepoch);
 	    rpmlog(RPMLOG_NOTICE, _("setting %s=%s\n"), "SOURCE_DATE_EPOCH", sdestr);
 	    setenv("SOURCE_DATE_EPOCH", sdestr, 0);
 	    rpmtdFreeData(&td);
